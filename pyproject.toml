@@ -1,0 +1,30 @@
+[project]
+name = "midimaster"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Luqman Al-Hakim", email = "luqman.alhakim2903@gmail.com" }
+]
+requires-python = "==3.11.*"
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn",
+    "torch",
+    "yt-dlp",
+    "transformers<=4.44.2",
+    "accelerate",
+    "torchaudio",
+    "mir_eval",
+    "pretty_midi",
+    "midi2audio",
+    "python-multipart",
+    "uvloop>=0.23.0",
+]
+
+[project.scripts]
+midimaster = "midimaster:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
