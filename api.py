@@ -109,9 +109,6 @@ def download_audio(url: str, output_path: str) -> str:
         ydl.download([url])
     return output_path
 
-@app.get("/demo")
-def index():
-    return FileResponse(DIST_DIR / "index.html")
 
 @app.post("/transcribe")
 def transcribe(url: str = Form(...)):
