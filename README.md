@@ -1,6 +1,12 @@
 <div align="center">
-    <h1>s</h1>
+    <h3> melodius </h3>
+    <i> understand your melodies </i>
 </div>
+
+---
+
+* Focus on transcribing accurate melodies from provided media and produce clear and accurate MIDI's 
+* Powered by SheetSage2
 
 ## Requirements
 
@@ -29,4 +35,6 @@ npm run dev       # Start frontend and API
 npm run dev:web   # Start only Vite
 npm run dev:api   # Start only the API
 ```
+
+
 
