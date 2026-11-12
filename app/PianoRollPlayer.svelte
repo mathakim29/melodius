@@ -634,10 +634,11 @@
   }
 </script>
 
-<div class="block overflow-hidden bg-neutral-900 text-neutral-100">
+<div class="prp">
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="relative overflow-hidden rounded-lg border p-3 font-sans {drag ? 'border-neutral-300' : 'border-neutral-700'} bg-neutral-800"
+    class="panel"
+    class:drag
     ondragenter={onDrag}
     ondragover={onDrag}
     ondragleave={onDragLeave}
@@ -645,65 +646,56 @@
   >
     <!-- Top Bar: Conditionally rendered only if midiPicker or sfPicker is enabled -->
     {#if showTopBar}
-      <div class="mb-2.5 flex flex-wrap items-center gap-2 pb-1">
+      <div class="topbar">
         {#if midiPicker}
-          <label
-            class="inline-flex max-w-[200px] cursor-pointer items-center gap-1.5 overflow-hidden rounded border border-neutral-600 bg-neutral-700 px-2.5 py-1 text-xs text-neutral-100 transition-colors hover:border-neutral-400"
-            title="Choose MIDI file (or drop it here)"
-          >
-            <span class="flex-none text-[10px] font-semibold uppercase tracking-wider text-neutral-400">MIDI</span>
-            <span class="min-w-0 truncate" title={midiLabel}>{midiLabel}</span>
+          <label class="filebtn" title="Choose MIDI file (or drop it here)">
+            <span class="filebtn-tag">MIDI</span>
+            <span class="filebtn-name" title={midiLabel}>{midiLabel}</span>
             <input class="hidden" type="file" accept=".mid,.midi" onchange={onMidiChange} />
           </label>
         {/if}
 
         {#if sfPicker && soundfontEnabled}
-          <label
-            class="inline-flex max-w-[200px] cursor-pointer items-center gap-1.5 overflow-hidden rounded border border-neutral-600 bg-neutral-700 px-2.5 py-1 text-xs text-neutral-100 transition-colors hover:border-neutral-400"
-            title="Choose SoundFont file (or drop it here)"
-          >
-            <span class="flex-none text-[10px] font-semibold uppercase tracking-wider text-neutral-400">SF2</span>
-            <span class="min-w-0 truncate" title={sfLabel}>{sfLabel}</span>
+          <label class="filebtn" title="Choose SoundFont file (or drop it here)">
+            <span class="filebtn-tag">SF2</span>
+            <span class="filebtn-name" title={sfLabel}>{sfLabel}</span>
             <input class="hidden" type="file" accept=".sf2,.sf3" onchange={onSfChange} />
           </label>
         {/if}
       </div>
     {/if}
 
-    <div class="mb-2.5 flex flex-col gap-1.5">
+    <div class="tracks">
       {#each Object.entries(tracks) as [key, tr] (key)}
-        <div class="flex flex-wrap items-center gap-1.5">
+        <div class="track-row">
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded border border-neutral-600 bg-neutral-700 px-2.5 py-1 text-xs font-medium leading-none text-neutral-100 outline-none transition hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 {vis[key] ? '' : 'opacity-40'}"
+            class="track-btn"
+            class:off={!vis[key]}
             aria-pressed={vis[key]}
             onclick={() => toggleVis(key)}
           >
             <span
-              class="h-2 w-2 rounded-full"
-              class:bg-neutral-300={!vis[key]}
-              class:bg-transparent={!vis[key]}
-              class:ring-2={!vis[key]}
-              class:ring-inset={!vis[key]}
-              class:ring-neutral-500={!vis[key]}
+              class="dot"
+              class:off={!vis[key]}
               style={vis[key] ? `background-color:${tr.color}` : ''}
             ></span>
             {tr.label}
           </button>
 
-          <span class="inline-flex items-center gap-1.5 text-xs text-neutral-400">
+          <span class="inst-wrap">
             <span>Instrument</span>
             <button
               type="button"
-              class="inline-flex w-[200px] max-w-full cursor-pointer items-center justify-between gap-2 rounded border border-l-4 border-neutral-600 bg-neutral-700 px-2 py-1 text-left text-xs leading-tight text-neutral-100 outline-none transition-colors hover:enabled:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-500 disabled:cursor-default disabled:opacity-40"
+              class="inst-btn"
               style={`border-left-color:${tr.color}`}
               aria-haspopup="listbox"
               disabled={!midiPicker && !sfPicker}
               title={instLabel(tr)}
               onclick={(e) => onPickClick(e, key)}
             >
-              <span class="min-w-0 truncate">{instLabel(tr)}</span>
-              <svg class="h-3 w-3 flex-none opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+              <span class="inst-label">{instLabel(tr)}</span>
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
             </button>
           </span>
         </div>
@@ -711,50 +703,36 @@
     </div>
 
     <!-- Piano roll container with loading overlay and fallback text -->
-    <div
-      class="relative w-full overflow-hidden rounded border border-neutral-700 bg-neutral-900 text-neutral-100 [&_canvas]:max-w-full [&_svg]:max-w-full"
-      bind:this={rollEl}
-      style="height:{height}px"
-    >
+    <div class="roll" bind:this={rollEl} style="height:{height}px">
       {#if notes.length === 0 && !isLoading}
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none text-neutral-500 text-sm font-medium">
-          Midi not loaded yet
-        </div>
+        <div class="roll-empty">Midi not loaded yet</div>
       {/if}
 
       {#if isLoading}
-        <div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/80 backdrop-blur-xs gap-2">
-          <svg class="animate-spin h-6 w-6 text-neutral-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div class="overlay">
+          <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="spinner-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="spinner-head" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span class="text-xs font-medium text-neutral-300">{loadingMessage}</span>
+          <span class="overlay-text">{loadingMessage}</span>
         </div>
       {/if}
     </div>
 
     {#if status}
-      <div
-        class="pointer-events-none mt-1 block w-full rounded border border-neutral-700 bg-neutral-800/90 px-2 py-1.5 text-center text-[10px] leading-tight text-neutral-300"
-        role="status"
-        aria-live="polite"
-      >{status}</div>
+      <div class="status" role="status" aria-live="polite">{status}</div>
     {/if}
 
-    <div class="mt-2.5 flex items-center gap-2.5">
-      <button
-        class="grid h-[34px] w-[34px] flex-none cursor-pointer place-items-center rounded border-0 bg-neutral-200 p-0 text-neutral-900 outline-none transition-transform focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-95"
-        aria-label={playing ? 'Pause' : 'Play'}
-        onclick={() => toggle()}
-      >
+    <div class="transport">
+      <button class="play-btn" aria-label={playing ? 'Pause' : 'Play'} onclick={() => toggle()}>
         {#if playing}
-          <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+          <svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
         {:else}
-          <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
         {/if}
       </button>
       <input
-        class="m-0 min-w-0 flex-1 cursor-pointer accent-neutral-300"
+        class="seek"
         type="range"
         min="0"
         max="1000"
@@ -762,17 +740,14 @@
         oninput={(e) => { seekValue = +e.currentTarget.value; }}
         onchange={onSeek}
       />
-      <span class="flex-none text-xs tabular-nums text-neutral-400">{timeText}</span>
+      <span class="time">{timeText}</span>
     </div>
   </div>
 
   {#if pop}
-    <div
-      class="fixed z-[9999] flex min-w-[220px] flex-col overflow-hidden rounded-lg border border-neutral-600 bg-neutral-800 font-sans text-neutral-100 shadow-2xl"
-      style={pop.style}
-    >
+    <div class="pop" style={pop.style}>
       <input
-        class="w-full flex-none border-0 border-b border-neutral-600 bg-neutral-900 px-2.5 py-2 text-xs text-neutral-100 outline-none placeholder:text-neutral-500"
+        class="pop-search"
         type="text"
         placeholder="Search instruments…"
         spellcheck="false"
@@ -782,24 +757,402 @@
         oninput={() => (popIdx = 0)}
         onkeydown={onPopKey}
       />
-      <ul class="m-0 flex-1 list-none overflow-y-auto p-1" role="listbox" bind:this={popListEl} style="max-height:{pop.listMax}px">
+      <ul class="pop-list" role="listbox" bind:this={popListEl} style="max-height:{pop.listMax}px">
         {#each filtered as it, i (it.n)}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <li
-            class="flex cursor-pointer items-center gap-1.5 overflow-hidden whitespace-nowrap rounded px-2 py-[5px] text-xs transition-colors {i === popIdx ? 'bg-neutral-600' : 'hover:bg-neutral-700'} {it.value === pop.current ? 'font-semibold text-neutral-50' : 'text-neutral-200'}"
+            class="pop-item"
+            class:active={i === popIdx}
+            class:current={it.value === pop.current}
             role="option"
             aria-selected={it.value === pop.current}
             title={it.label}
             onpointermove={() => { if (popIdx !== i) popIdx = i; }}
             onclick={() => commitPicker(i)}
           >
-            <span class="w-[26px] flex-none text-[10px] tabular-nums text-neutral-500">{it.value === null ? '' : it.n}</span>
-            <span class="truncate">{it.label}</span>
+            <span class="pop-idx">{it.value === null ? '' : it.n}</span>
+            <span class="pop-label">{it.label}</span>
           </li>
         {:else}
-          <li class="cursor-default px-2 py-[5px] text-xs text-neutral-500">No matches</li>
+          <li class="pop-empty">No matches</li>
         {/each}
       </ul>
     </div>
   {/if}
 </div>
+
+<style>
+  .prp {
+    display: block;
+    overflow: hidden;
+    background: #171717;
+    color: #f5f5f5;
+  }
+  .prp *,
+  .prp *::before,
+  .prp *::after {
+    box-sizing: border-box;
+  }
+  .hidden {
+    display: none;
+  }
+
+  /* ---- panel ---- */
+  .panel {
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    background: #262626;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .panel.drag {
+    border-color: #d4d4d4;
+  }
+
+  /* ---- top bar ---- */
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 4px;
+  }
+  .filebtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 200px;
+    overflow: hidden;
+    padding: 4px 10px;
+    border: 1px solid #525252;
+    border-radius: 4px;
+    background: #404040;
+    color: #f5f5f5;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .filebtn:hover {
+    border-color: #a3a3a3;
+  }
+  .filebtn-tag {
+    flex: none;
+    color: #a3a3a3;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .filebtn-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ---- tracks ---- */
+  .tracks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .track-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .track-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid #525252;
+    border-radius: 4px;
+    background: #404040;
+    color: #f5f5f5;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, opacity 0.15s;
+  }
+  .track-btn:hover {
+    border-color: #a3a3a3;
+  }
+  .track-btn:focus-visible {
+    box-shadow: 0 0 0 2px #a3a3a3;
+  }
+  .track-btn.off {
+    opacity: 0.4;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .dot.off {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px #737373;
+  }
+
+  .inst-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #a3a3a3;
+    font-size: 12px;
+  }
+  .inst-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 200px;
+    max-width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #525252;
+    border-left-width: 4px;
+    border-radius: 4px;
+    background: #404040;
+    color: #f5f5f5;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .inst-btn:hover:not(:disabled) {
+    border-top-color: #a3a3a3;
+    border-right-color: #a3a3a3;
+    border-bottom-color: #a3a3a3;
+  }
+  .inst-btn:focus-visible {
+    box-shadow: 0 0 0 2px #737373;
+  }
+  .inst-btn:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+  .inst-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chevron {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    opacity: 0.6;
+  }
+
+  /* ---- piano roll ---- */
+  .roll {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    background: #171717;
+    color: #f5f5f5;
+  }
+  .roll :global(canvas),
+  .roll :global(svg) {
+    max-width: 100%;
+  }
+  .roll-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #737373;
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(23, 23, 23, 0.8);
+    backdrop-filter: blur(4px);
+  }
+  .spinner {
+    width: 24px;
+    height: 24px;
+    color: #d4d4d4;
+    animation: spin 1s linear infinite;
+  }
+  .spinner-track {
+    opacity: 0.25;
+  }
+  .spinner-head {
+    opacity: 0.75;
+  }
+  .overlay-text {
+    color: #d4d4d4;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ---- status ---- */
+  .status {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    padding: 6px 8px;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    background: rgba(38, 38, 38, 0.9);
+    color: #d4d4d4;
+    font-size: 10px;
+    line-height: 1.25;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  /* ---- transport ---- */
+  .transport {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .play-btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: #e5e5e5;
+    color: #171717;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.1s;
+  }
+  .play-btn:focus-visible {
+    box-shadow: 0 0 0 2px #a3a3a3;
+  }
+  .play-btn:active {
+    transform: scale(0.95);
+  }
+  .play-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+  .seek {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #d4d4d4;
+  }
+  .time {
+    flex: none;
+    color: #a3a3a3;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- instrument popover ---- */
+  .pop {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    overflow: hidden;
+    border: 1px solid #525252;
+    border-radius: 8px;
+    background: #262626;
+    color: #f5f5f5;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  .pop-search {
+    flex: none;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-bottom: 1px solid #525252;
+    background: #171717;
+    color: #f5f5f5;
+    font: inherit;
+    font-size: 12px;
+    outline: none;
+  }
+  .pop-search::placeholder {
+    color: #737373;
+  }
+  .pop-list {
+    flex: 1;
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    list-style: none;
+  }
+  .pop-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    padding: 5px 8px;
+    border-radius: 4px;
+    color: #e5e5e5;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s;
+  }
+  .pop-item:hover {
+    background: #404040;
+  }
+  .pop-item.active {
+    background: #525252;
+  }
+  .pop-item.current {
+    color: #fafafa;
+    font-weight: 600;
+  }
+  .pop-idx {
+    flex: none;
+    width: 26px;
+    color: #737373;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pop-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pop-empty {
+    padding: 5px 8px;
+    color: #737373;
+    font-size: 12px;
+    cursor: default;
+  }
+</style>

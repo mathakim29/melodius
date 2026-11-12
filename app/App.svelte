@@ -73,9 +73,14 @@
   <meta name="description" content="Turn songs into playable MIDI piano rolls" />
 </svelte:head>
 
-<main class="min-h-screen px-4 py-12 text-zinc-100">
-  <section class="mx-auto max-w-3xl bg-zinc-900 p-10">
-    <header class="mb-8">
+<main class="min-h-screen px-4 py-12 text-zinc-100 mx-auto max-w-3xl">
+
+  <div class="flex items-center justify-center mb-10">
+  <img src="logo.png">
+  </div>
+
+  <section class="bg-zinc-900 p-10">
+    <!-- <header class="mb-8">
       <div class="flex items-center justify-between">
         <p class="font-mono text-xs uppercase tracking-[0.3em] text-zinc-300">melodius</p>
         <span class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
@@ -85,7 +90,7 @@
       </div>
       <h1 class="mt-3 text-3xl font-semibold tracking-tight">Hear the melody</h1>
       <p class="mt-2 text-sm text-zinc-400">Paste a song URL and turn its melody into a playable piano roll.</p>
-    </header>
+    </header> -->
 
     <form onsubmit={(event) => { event.preventDefault(); transcribe(); }} class="space-y-5">
       <label class="block space-y-2">
@@ -115,6 +120,29 @@
   @import "tailwindcss";
 
   :global(body) {
-    background-image: url(https://file.garden/ZWlUCY4S7Xz2vypS/archived%20backgrounds/colours/orange/red026.jpg);
-  }
+  position: relative;
+  margin: 0;
+  min-height: 100vh;
+}
+
+:global(body::before) {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* Image fit settings */
+  background-image: url("/bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Transparency and layering */
+  opacity: 0.2; /* Adjust from 0.0 (invisible) to 1.0 (solid) */
+  z-index: -1;
+  filter: grayscale(100%);
+}
+
 </style>
