@@ -1,6 +1,5 @@
 <div align="center">
-    <h3> melodius </h3>
-    <i> understand your melodies </i>
+    <img src="public/logo2.png"><br>
 </div>
 
 ---
